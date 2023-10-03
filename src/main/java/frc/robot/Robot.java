@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.Joystick;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import edu.wpi.first.wpilibj.Timer;
+import com.kauailabs.navx.frc.AHRS;
 
 
 /**
@@ -33,6 +35,9 @@ public class Robot extends TimedRobot {
   Joystick driver = new Joystick(0);
   Joystick oper = new Joystick(1);
 
+  AHRS navX = new AHRS();
+  Timer timer = new Timer();
+
   Encoder encL = new Encoder(0, 1, false);
   Encoder encR = new Encoder(2, 3, true);
   
@@ -41,7 +46,22 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
 
-   
+  
+  public void Shoot(double power) {
+    l_intake.set(ControlMode.PercentOutput, power);
+    r_intake.set(ControlMode.PercentOutput, power);
+  }
+
+  public void Fold(double power) {
+    l_kipul.set(ControlMode.PercentOutput, power);
+    r_kipul.set(ControlMode.PercentOutput, power);
+  }
+
+  public void Drive(double power) {
+    lf_motor.set(ControlMode.PercentOutput, power);
+    rf_motor.set(ControlMode.PercentOutput, power);
+  }
+
   public void Arcade(double thr, double turn) {
     if (Math.abs(thr - 0.05) < 0.1) {
       thr = 0.0;
@@ -70,6 +90,53 @@ public class Robot extends TimedRobot {
     rf_motor.set(ControlMode.PercentOutput, y2);
     }
 
+  public void WallRideAuto(double a, double b)
+  {
+    if(timer.get() < 0.2)
+    {
+      Fold(-0.1);
+    }
+    else if(timer.get() < 1)
+    {
+      Shoot(-1.0);
+      Fold(0.0);
+    }
+    else
+    {
+      if (a <= 7 && b <= 7) {
+        Drive(0.6);
+        Shoot(0.0);
+        Fold(0.0);
+      }
+      else {
+        Drive(0.0);
+        Shoot(0.0);
+        Fold(0.0);
+      }
+    }
+  }
+
+  public void ChargeStationAuto()
+  {
+    if(timer.get() > 1) {
+      if(timer.get() < 5) {
+        Drive(0.6);
+        Shoot(0.0);
+        Fold(0.0);
+      } 
+      else {
+        Drive(0.0);
+        Shoot(0.0);
+        Fold(0.0);
+      }
+      if(timer.get() <= 1)
+      {
+        Shoot(1.0);
+        Fold(1.0);
+      }
+    }
+  }
+
   @Override
   public void robotInit() {
     // r_kipul.follow(l_kipul);
@@ -91,20 +158,25 @@ public class Robot extends TimedRobot {
     encR.reset();
     encL.setReverseDirection(false);
     encR.setReverseDirection(true);
-    encL.setDistancePerPulse(1/11.6);
-    encR.setDistancePerPulse(1/11.6);
+    encL.setDistancePerPulse(1/1024.0);
+    encR.setDistancePerPulse(1/1024.0);
+    timer.restart();
   }
 
   @Override
   public void robotPeriodic() {
     SmartDashboard.putNumber("Enc left", encL.getDistance());
     SmartDashboard.putNumber("Enc Right", encR.getDistance());
+    SmartDashboard.putNumber("Timer", timer.get());
+    SmartDashboard.putNumber("Robot Roll", navX.getRoll());
   }
 
   @Override
   public void autonomousInit() {
     encL.reset();
     encR.reset();
+    timer.restart();
+    navX.reset();
   }
 
   @Override
@@ -112,18 +184,14 @@ public class Robot extends TimedRobot {
     double a = encL.getDistance();
     double b = encR.getDistance();
 
-  if (a <= 10 && b <= 10) {
-      lf_motor.set(ControlMode.PercentOutput, 0.6);
-      rf_motor.set(ControlMode.PercentOutput, 0.6);
-    }
-  else {
-      lf_motor.set(ControlMode.PercentOutput, 0.0);
-      rf_motor.set(ControlMode.PercentOutput, 0.0);
-    }
+    WallRideAuto(a, b);
+    //ChargeStationAuto();
   }
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    timer.restart();
+  }
   
   @Override
   public void teleopPeriodic() 
@@ -168,13 +236,17 @@ public class Robot extends TimedRobot {
       r_kipul.set(ControlMode.PercentOutput, 0.0);
     }
 
-    if (oper.getRawButton(1)) {
-      r_kipul.set(ControlMode.PercentOutput, stick);
-      l_kipul.set(ControlMode.PercentOutput, stick);
-    } else {
-      r_kipul.set(ControlMode.PercentOutput, 0.0);
-      l_kipul.set(ControlMode.PercentOutput, 0.0);
-    }
+    // if (oper.getRawButton(1)) {
+    //   r_kipul.set(ControlMode.PercentOutput, stick);
+    //   l_kipul.set(ControlMode.PercentOutput, stick);
+    //   r_intake.set(ControlMode.PercentOutput, stick);
+    //   l_intake.set(ControlMode.PercentOutput, stick);
+    // } else {
+    //   r_kipul.set(ControlMode.PercentOutput, 0.0);
+    //   l_kipul.set(ControlMode.PercentOutput, 0.0);
+    //   r_intake.set(ControlMode.PercentOutput, 0.0);
+    //   l_intake.set(ControlMode.PercentOutput, 0.0);
+    // }
 
     // // Angel Control System : Up
     // if(a){
