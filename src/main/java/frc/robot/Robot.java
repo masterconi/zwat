@@ -168,6 +168,13 @@ public class Robot extends TimedRobot {
       r_kipul.set(ControlMode.PercentOutput, 0.0);
     }
 
+    if (oper.getRawButton(1)) {
+      r_kipul.set(ControlMode.PercentOutput, stick);
+      l_kipul.set(ControlMode.PercentOutput, stick);
+    } else {
+      r_kipul.set(ControlMode.PercentOutput, 0.0);
+      l_kipul.set(ControlMode.PercentOutput, 0.0);
+    }
 
     // // Angel Control System : Up
     // if(a){
