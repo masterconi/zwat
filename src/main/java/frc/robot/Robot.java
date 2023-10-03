@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 
@@ -21,28 +20,21 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
  * project.
  */
 public class Robot extends TimedRobot {
-  TalonSRX LwhealM = new TalonSRX(1);
-  VictorSPX LwhealS = new VictorSPX(2);
-  VictorSPX RwhealM = new VictorSPX(3);
-  TalonSRX RwhealS = new TalonSRX(4);
+  VictorSPX lb_motor = new VictorSPX(1);
+  VictorSPX lf_motor = new VictorSPX(2);
+  VictorSPX rf_motor = new VictorSPX(3);
+  TalonSRX rb_motor = new TalonSRX(4);
   
   TalonSRX lz_tal = new TalonSRX(5);
   VictorSPX rz_vic = new VictorSPX(6);
   VictorSPX link_vic = new VictorSPX(7);
   TalonSRX rink_tal = new TalonSRX(8);
   
-  Joystick jDriver = new Joystick(0);
-  Joystick cDriver = new Joystick(2);
+  Joystick driver = new Joystick(0);
   Joystick oper = new Joystick(1);
-  
-  double thr = jDriver.getRawAxis(1);
-  double turn = jDriver.getRawAxis(0);
-  double cThr = cDriver.getRawAxis(1);
-  double cRight = cDriver.getRawAxis(4);
-  double cTurn = cDriver.getRawAxis(5);
 
   Encoder encL = new Encoder(0, 1, false);
-  Encoder encR = new Encoder(3, 4, true);
+  Encoder encR = new Encoder(2, 3, true);
   
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -50,77 +42,64 @@ public class Robot extends TimedRobot {
    */
 
    
-  public void Arcade() {
-    if (Math.abs(thr) < 0.1) {
+  public void Arcade(double thr, double turn) {
+    if (Math.abs(thr - 0.05) < 0.1) {
       thr = 0.0;
     }
-    if (Math.abs(turn) < 0.1) {
+    if (Math.abs(turn + 0.1) < 0.1) {
       turn = 0.0;
     }
 
     double l = -thr + turn;
     double r = -thr - turn;
 
-    LwhealM.set(ControlMode.PercentOutput, l - 0.1);
-    RwhealM.set(ControlMode.PercentOutput, r);
+    lf_motor.set(ControlMode.PercentOutput, l);
+    rf_motor.set(ControlMode.PercentOutput, r);
   }
 
- /*  public void ConArcade() {
-    if (Math.abs(cThr) < 0.1) {
-      cThr = 0.0;
-    }
-    if (Math.abs(cTurn) < 0.1) {
-      cTurn = 0.0;
-    }
-
-    double le = -cThr + cTurn;
-    double ri = -cThr - cTurn;
-
-    LwhealM.set(ControlMode.PercentOutput, le - 0.1);
-    RwhealM.set(ControlMode.PercentOutput, ri);
-  }*/
-
- /*  public void Tank() {
+  public void Tank(double y1, double y2) {
     // Made For Controllers
-    if (Math.abs(cThr) < 0.1) {
-      cThr = 0.0;
+    if (Math.abs(y1) < 0.1) {
+      y1 = 0.0;
     }
-    if (Math.abs(cRight) < 0.1) {
-      cRight = 0.0;
+    if (Math.abs(y2) < 0.1) {
+      y2 = 0.0;
     }
 
-    LwhealM.set(ControlMode.PercentOutput, cThr);
-    RwhealM.set(ControlMode.PercentOutput, cTurn);
-  }*/
+    lf_motor.set(ControlMode.PercentOutput, y1);
+    rf_motor.set(ControlMode.PercentOutput, y2);
+    }
+
   @Override
   public void robotInit() {
     rz_vic.follow(lz_tal);
     rink_tal.follow(link_vic);
-    LwhealS.follow(LwhealM);
-    RwhealS.follow(RwhealM);
+    lb_motor.follow(lf_motor);
+    rb_motor.follow(rf_motor);
 
-    LwhealS.setInverted(false);
-    LwhealM.setInverted(false);
-    RwhealM.setInverted(true);
-    RwhealS.setInverted(true);
+    lb_motor.setInverted(false);
+    lf_motor.setInverted(false);
+    rf_motor.setInverted(true);
+    rb_motor.setInverted(true);
 
-
-    rz_vic.setInverted(false);
     lz_tal.setInverted(true);
     link_vic.setInverted(false);
     rink_tal.setInverted(true);
-
+    rz_vic.setInverted(false);
 
     encL.reset();
     encR.reset();
     encL.setReverseDirection(false);
     encR.setReverseDirection(true);
-
-    rink_tal.set(ControlMode.PercentOutput, -1.0);
+    encL.setDistancePerPulse(1/11.6);
+    encR.setDistancePerPulse(1/11.6);
   }
 
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    SmartDashboard.putNumber("Enc left", encL.getDistance());
+    SmartDashboard.putNumber("Enc Right", encR.getDistance());
+  }
 
   @Override
   public void autonomousInit() {
@@ -130,20 +109,16 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    SmartDashboard.putNumber("Enc left", encL.getDistance());
-    SmartDashboard.putNumber("Enc Right", encR.getDistance());
-
     double a = encL.getDistance();
     double b = encR.getDistance();
 
-    if (a <= 10 && b <= 10) {
-      LwhealM.set(ControlMode.PercentOutput, 0.6);
-      RwhealM.set(ControlMode.PercentOutput, 0.6);
-    } else {
-      LwhealM.set(ControlMode.PercentOutput, 0.0);
-      RwhealM.set(ControlMode.PercentOutput, 0.0);
-
-     
+  if (a <= 10 && b <= 10) {
+      lf_motor.set(ControlMode.PercentOutput, 0.6);
+      rf_motor.set(ControlMode.PercentOutput, 0.6);
+    }
+  else {
+      lf_motor.set(ControlMode.PercentOutput, 0.0);
+      rf_motor.set(ControlMode.PercentOutput, 0.0);
     }
   }
 
@@ -153,53 +128,50 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() 
   {
+    double ly_thr = driver.getRawAxis(1);
+    double rx_turn = driver.getRawAxis(4);
+    //double ry_thr= driver.getRawAxis(5);
+    
+    Arcade(ly_thr, rx_turn);
+    //Tank(ly_thr,ry_thr);
 
-    Arcade();
+    boolean a = oper.getRawButton(11);
+    boolean b = oper.getRawButton(12);        
+    boolean c = oper.getRawButton(3);
+    boolean d = oper.getRawButton(4);    
 
-    boolean a = jDriver.getRawButton(1);
-    boolean b = jDriver.getRawButton(2);        
-    boolean c = jDriver.getRawButton(3);
-    boolean d = jDriver.getRawButton(4);    
-
-    // Zavit
-    if(a)
-    {
-      lz_tal.set(ControlMode.PercentOutput, 1.0);
-      rz_vic.set(ControlMode.PercentOutput, 1.0);
+    // Angel Control System : Up
+    if(a){
+      lz_tal.set(ControlMode.PercentOutput, 0.5);
+      rz_vic.set(ControlMode.PercentOutput, 0.5);
     }
-    else
-    {
+    else{
       lz_tal.set(ControlMode.PercentOutput, 0.0);
       rz_vic.set(ControlMode.PercentOutput, 0.0);
     }
-    if(b)
-    {
-      lz_tal.set(ControlMode.PercentOutput, -1.0);
-      rz_vic.set(ControlMode.PercentOutput, -1.0);
+    // Angel Control System : Down
+    if(b){
+      lz_tal.set(ControlMode.PercentOutput, -0.5);
+      rz_vic.set(ControlMode.PercentOutput, -0.5);
     }
-    else
-    {
+    else{
       lz_tal.set(ControlMode.PercentOutput, 0.0);
       rz_vic.set(ControlMode.PercentOutput, 0.0);
     }
-
-    // INTAKE DA BUSSY
-    if(c)
-    {
-      rink_tal.set(ControlMode.PercentOutput, 1.0);
-      link_vic.set(ControlMode.PercentOutput, 1.0);}
-    else
-    {
+    // Outake
+    if(c){
+      rink_tal.set(ControlMode.PercentOutput, 0.5);
+      link_vic.set(ControlMode.PercentOutput, 0.5);}
+    else{
       rink_tal.set(ControlMode.PercentOutput, 0.0);
       link_vic.set(ControlMode.PercentOutput, 0.0);
     }
-    if(d)
-    {
-      rink_tal.set(ControlMode.PercentOutput, -1.0);
-      link_vic.set(ControlMode.PercentOutput, -1.0);    
+    // Intake
+    if(d){
+      rink_tal.set(ControlMode.PercentOutput, -0.5);
+      link_vic.set(ControlMode.PercentOutput, -0.5);    
     }
-    else
-    {
+    else{
       rink_tal.set(ControlMode.PercentOutput, 0.0);
       link_vic.set(ControlMode.PercentOutput, 0.0);
     }    
