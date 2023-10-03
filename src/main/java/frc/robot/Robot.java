@@ -27,8 +27,8 @@ public class Robot extends TimedRobot {
   VictorSPX rf_motor = new VictorSPX(3);
   TalonSRX rb_motor = new TalonSRX(4);
   
-  TalonSRX l_kipul = new TalonSRX(5);
-  VictorSPX r_kipul = new VictorSPX(6);
+  // TalonSRX l_kipul = new TalonSRX(5);
+  // VictorSPX r_kipul = new VictorSPX(6);
   VictorSPX l_intake = new VictorSPX(7);
   TalonSRX r_intake = new TalonSRX(8);
   
@@ -52,10 +52,10 @@ public class Robot extends TimedRobot {
     r_intake.set(ControlMode.PercentOutput, power);
   }
 
-  public void Fold(double power) {
-    l_kipul.set(ControlMode.PercentOutput, power);
-    r_kipul.set(ControlMode.PercentOutput, power);
-  }
+  // public void Fold(double power) {
+  //   l_kipul.set(ControlMode.PercentOutput, power);
+  //   r_kipul.set(ControlMode.PercentOutput, power);
+  // }
 
   public void Drive(double power) {
     lf_motor.set(ControlMode.PercentOutput, power);
@@ -92,26 +92,19 @@ public class Robot extends TimedRobot {
 
   public void WallRideAuto(double a, double b)
   {
-    if(timer.get() < 0.2)
-    {
-      Fold(-0.1);
-    }
-    else if(timer.get() < 1)
+    if(timer.get() < 1)
     {
       Shoot(-1.0);
-      Fold(0.0);
     }
     else
     {
       if (a <= 7 && b <= 7) {
         Drive(0.6);
         Shoot(0.0);
-        Fold(0.0);
       }
       else {
         Drive(0.0);
         Shoot(0.0);
-        Fold(0.0);
       }
     }
   }
@@ -122,24 +115,20 @@ public class Robot extends TimedRobot {
       if(timer.get() < 5) {
         Drive(0.6);
         Shoot(0.0);
-        Fold(0.0);
       } 
       else {
         Drive(0.0);
         Shoot(0.0);
-        Fold(0.0);
       }
       if(timer.get() <= 1)
       {
         Shoot(1.0);
-        Fold(1.0);
       }
     }
   }
 
   @Override
   public void robotInit() {
-    // r_kipul.follow(l_kipul);
     // r_intake.follow(l_intake);
     lb_motor.follow(lf_motor);
     rb_motor.follow(rf_motor);
@@ -149,8 +138,6 @@ public class Robot extends TimedRobot {
     rf_motor.setInverted(true);
     rb_motor.setInverted(true);
 
-    r_kipul.setInverted(true);
-    l_kipul.setInverted(true);
     r_intake.setInverted(true);
     l_intake.setInverted(false);
 
@@ -203,11 +190,21 @@ public class Robot extends TimedRobot {
     Arcade(ly_thr, rx_turn);
     //Tank(ly_thr,ry_thr);
 
-    boolean a = oper.getRawButton(11);
-    boolean b = oper.getRawButton(12);        
-    boolean c = oper.getRawButton(3);
-    boolean d = oper.getRawButton(4);   
-    
+    double power = oper.getRawAxis(1);
+    Shoot(power);
+  }
+
+  @Override
+  public void disabledInit() {}
+
+  @Override
+  public void disabledPeriodic() {}
+
+  @Override
+  public void testInit() {}
+
+  @Override
+  public void testPeriodic() {
     // read stick value and assign to value
 
     double stick = oper.getRawAxis(1);
@@ -224,78 +221,27 @@ public class Robot extends TimedRobot {
       r_intake.set(ControlMode.PercentOutput, 0.0);
     }
 
-    if (oper.getRawButton(9)) {
-      l_kipul.set(ControlMode.PercentOutput, stick);
-    } else {
-      l_kipul.set(ControlMode.PercentOutput, 0.0);
-    }
-
-    if (oper.getRawButton(10)) {
-      r_kipul.set(ControlMode.PercentOutput, stick);
-    } else {
-      r_kipul.set(ControlMode.PercentOutput, 0.0);
-    }
-
-    // if (oper.getRawButton(1)) {
-    //   r_kipul.set(ControlMode.PercentOutput, stick);
+    // if (oper.getRawButton(9)) {
     //   l_kipul.set(ControlMode.PercentOutput, stick);
-    //   r_intake.set(ControlMode.PercentOutput, stick);
-    //   l_intake.set(ControlMode.PercentOutput, stick);
+    // } else {
+    //   l_kipul.set(ControlMode.PercentOutput, 0.0);
+    // }
+
+    // if (oper.getRawButton(10)) {
+    //   r_kipul.set(ControlMode.PercentOutput, stick);
     // } else {
     //   r_kipul.set(ControlMode.PercentOutput, 0.0);
-    //   l_kipul.set(ControlMode.PercentOutput, 0.0);
-    //   r_intake.set(ControlMode.PercentOutput, 0.0);
-    //   l_intake.set(ControlMode.PercentOutput, 0.0);
     // }
 
-    // // Angel Control System : Up
-    // if(a){
-    //   l_kipul.set(ControlMode.PercentOutput, 0.5);
-    //   r_kipul.set(ControlMode.PercentOutput, 0.5);
-    // }
-    // else{
-    //   l_kipul.set(ControlMode.PercentOutput, 0.0);
-    //   r_kipul.set(ControlMode.PercentOutput, 0.0);
-    // }
-    // // Angel Control System : Down
-    // if(b){
-    //   l_kipul.set(ControlMode.PercentOutput, -0.5);
-    //   r_kipul.set(ControlMode.PercentOutput, -0.5);
-    // }
-    // else{
-    //   l_kipul.set(ControlMode.PercentOutput, 0.0);
-    //   r_kipul.set(ControlMode.PercentOutput, 0.0);
-    // }
-    // // Outake
-    // if(c){
-    //   r_intake.set(ControlMode.PercentOutput, 0.5);
-    //   l_intake.set(ControlMode.PercentOutput, 0.5);}
-    // else{
-    //   r_intake.set(ControlMode.PercentOutput, 0.0);
-    //   l_intake.set(ControlMode.PercentOutput, 0.0);
-    // }
-    // // Intake
-    // if(d){
-    //   r_intake.set(ControlMode.PercentOutput, -0.5);
-    //   l_intake.set(ControlMode.PercentOutput, -0.5);    
-    // }
-    // else{
-    //   r_intake.set(ControlMode.PercentOutput, 0.0);
-    //   l_intake.set(ControlMode.PercentOutput, 0.0);
-    // }    
+    if (oper.getRawButton(1)) {
+      r_intake.set(ControlMode.PercentOutput, stick);
+      l_intake.set(ControlMode.PercentOutput, stick);
+    } 
+    else {
+      r_intake.set(ControlMode.PercentOutput, 0.0);
+      l_intake.set(ControlMode.PercentOutput, 0.0);
+    }
   }
-
-  @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void testInit() {}
-
-  @Override
-  public void testPeriodic() {}
 
   @Override
   public void simulationInit() {}
