@@ -25,10 +25,10 @@ public class Robot extends TimedRobot {
   VictorSPX rf_motor = new VictorSPX(3);
   TalonSRX rb_motor = new TalonSRX(4);
   
-  TalonSRX lz_tal = new TalonSRX(5);
-  VictorSPX rz_vic = new VictorSPX(6);
-  VictorSPX link_vic = new VictorSPX(7);
-  TalonSRX rink_tal = new TalonSRX(8);
+  TalonSRX l_kipul = new TalonSRX(5);
+  VictorSPX r_kipul = new VictorSPX(6);
+  VictorSPX l_intake = new VictorSPX(7);
+  TalonSRX r_intake = new TalonSRX(8);
   
   Joystick driver = new Joystick(0);
   Joystick oper = new Joystick(1);
@@ -72,8 +72,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    rz_vic.follow(lz_tal);
-    rink_tal.follow(link_vic);
+    // r_kipul.follow(l_kipul);
+    // r_intake.follow(l_intake);
     lb_motor.follow(lf_motor);
     rb_motor.follow(rf_motor);
 
@@ -82,10 +82,10 @@ public class Robot extends TimedRobot {
     rf_motor.setInverted(true);
     rb_motor.setInverted(true);
 
-    lz_tal.setInverted(true);
-    link_vic.setInverted(false);
-    rink_tal.setInverted(true);
-    rz_vic.setInverted(false);
+    r_kipul.setInverted(true);
+    l_kipul.setInverted(true);
+    r_intake.setInverted(true);
+    l_intake.setInverted(false);
 
     encL.reset();
     encR.reset();
@@ -138,43 +138,72 @@ public class Robot extends TimedRobot {
     boolean a = oper.getRawButton(11);
     boolean b = oper.getRawButton(12);        
     boolean c = oper.getRawButton(3);
-    boolean d = oper.getRawButton(4);    
+    boolean d = oper.getRawButton(4);   
+    
+    // read stick value and assign to value
 
-    // Angel Control System : Up
-    if(a){
-      lz_tal.set(ControlMode.PercentOutput, 0.5);
-      rz_vic.set(ControlMode.PercentOutput, 0.5);
+    double stick = oper.getRawAxis(1);
+
+    if (oper.getRawButton(7)) {
+      l_intake.set(ControlMode.PercentOutput, stick);
+    } else {
+      l_intake.set(ControlMode.PercentOutput, 0.0);
     }
-    else{
-      lz_tal.set(ControlMode.PercentOutput, 0.0);
-      rz_vic.set(ControlMode.PercentOutput, 0.0);
+
+    if (oper.getRawButton(8)) {
+      r_intake.set(ControlMode.PercentOutput, stick);
+    } else {
+      r_intake.set(ControlMode.PercentOutput, 0.0);
     }
-    // Angel Control System : Down
-    if(b){
-      lz_tal.set(ControlMode.PercentOutput, -0.5);
-      rz_vic.set(ControlMode.PercentOutput, -0.5);
+
+    if (oper.getRawButton(9)) {
+      l_kipul.set(ControlMode.PercentOutput, stick);
+    } else {
+      l_kipul.set(ControlMode.PercentOutput, 0.0);
     }
-    else{
-      lz_tal.set(ControlMode.PercentOutput, 0.0);
-      rz_vic.set(ControlMode.PercentOutput, 0.0);
+
+    if (oper.getRawButton(10)) {
+      r_kipul.set(ControlMode.PercentOutput, stick);
+    } else {
+      r_kipul.set(ControlMode.PercentOutput, 0.0);
     }
-    // Outake
-    if(c){
-      rink_tal.set(ControlMode.PercentOutput, 0.5);
-      link_vic.set(ControlMode.PercentOutput, 0.5);}
-    else{
-      rink_tal.set(ControlMode.PercentOutput, 0.0);
-      link_vic.set(ControlMode.PercentOutput, 0.0);
-    }
-    // Intake
-    if(d){
-      rink_tal.set(ControlMode.PercentOutput, -0.5);
-      link_vic.set(ControlMode.PercentOutput, -0.5);    
-    }
-    else{
-      rink_tal.set(ControlMode.PercentOutput, 0.0);
-      link_vic.set(ControlMode.PercentOutput, 0.0);
-    }    
+
+
+    // // Angel Control System : Up
+    // if(a){
+    //   l_kipul.set(ControlMode.PercentOutput, 0.5);
+    //   r_kipul.set(ControlMode.PercentOutput, 0.5);
+    // }
+    // else{
+    //   l_kipul.set(ControlMode.PercentOutput, 0.0);
+    //   r_kipul.set(ControlMode.PercentOutput, 0.0);
+    // }
+    // // Angel Control System : Down
+    // if(b){
+    //   l_kipul.set(ControlMode.PercentOutput, -0.5);
+    //   r_kipul.set(ControlMode.PercentOutput, -0.5);
+    // }
+    // else{
+    //   l_kipul.set(ControlMode.PercentOutput, 0.0);
+    //   r_kipul.set(ControlMode.PercentOutput, 0.0);
+    // }
+    // // Outake
+    // if(c){
+    //   r_intake.set(ControlMode.PercentOutput, 0.5);
+    //   l_intake.set(ControlMode.PercentOutput, 0.5);}
+    // else{
+    //   r_intake.set(ControlMode.PercentOutput, 0.0);
+    //   l_intake.set(ControlMode.PercentOutput, 0.0);
+    // }
+    // // Intake
+    // if(d){
+    //   r_intake.set(ControlMode.PercentOutput, -0.5);
+    //   l_intake.set(ControlMode.PercentOutput, -0.5);    
+    // }
+    // else{
+    //   r_intake.set(ControlMode.PercentOutput, 0.0);
+    //   l_intake.set(ControlMode.PercentOutput, 0.0);
+    // }    
   }
 
   @Override
