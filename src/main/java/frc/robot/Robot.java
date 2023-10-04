@@ -189,9 +189,25 @@ public class Robot extends TimedRobot {
     
     Arcade(ly_thr, rx_turn);
     //Tank(ly_thr,ry_thr);
-//[[]]
+    
     double power = oper.getRawAxis(1);
+    double but1 = oper.getRawButton(1);
+    double but2 = oper.getRawButton(2);
+    double out = 1.0;
     Shoot(power);
+
+    if(but1)
+    {
+      Shoot(out);
+    }
+    else if(but2)
+    {
+      Shoot(-out);
+    }
+    else
+    {
+      Shoot(0.0);
+    }
   }
 
   @Override
