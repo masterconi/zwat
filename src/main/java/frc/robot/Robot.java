@@ -189,7 +189,7 @@ public class Robot extends TimedRobot {
     
     Arcade(ly_thr, rx_turn);
     //Tank(ly_thr,ry_thr);
-
+//[[]]
     double power = oper.getRawAxis(1);
     Shoot(power);
   }
