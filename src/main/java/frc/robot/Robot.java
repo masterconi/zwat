@@ -22,10 +22,10 @@ import com.kauailabs.navx.frc.AHRS;
  * project.
  */
 public class Robot extends TimedRobot {
-  VictorSPX lb_motor = new VictorSPX(1);
+  TalonSRX lb_motor = new TalonSRX(1);
   VictorSPX lf_motor = new VictorSPX(2);
   VictorSPX rf_motor = new VictorSPX(3);
-  TalonSRX rb_motor = new TalonSRX(4);
+  VictorSPX rb_motor = new VictorSPX(4);
   
   // TalonSRX l_kipul = new TalonSRX(5);
   // VictorSPX r_kipul = new VictorSPX(6);
@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
 
-  
+   
   public void Shoot(double power) {
     l_intake.set(ControlMode.PercentOutput, power);
     r_intake.set(ControlMode.PercentOutput, power);
@@ -59,6 +59,8 @@ public class Robot extends TimedRobot {
 
   public void Drive(double power) {
     lf_motor.set(ControlMode.PercentOutput, power);
+    lb_motor.set(ControlMode.PercentOutput, power);
+    rb_motor.set(ControlMode.PercentOutput, power);
     rf_motor.set(ControlMode.PercentOutput, power);
   }
 
@@ -73,8 +75,11 @@ public class Robot extends TimedRobot {
     double l = -thr + turn;
     double r = -thr - turn;
 
+    
     lf_motor.set(ControlMode.PercentOutput, l);
     rf_motor.set(ControlMode.PercentOutput, r);
+    lb_motor.set(ControlMode.PercentOutput, l);
+    rb_motor.set(ControlMode.PercentOutput, r);
   }
 
   public void Tank(double y1, double y2) {
@@ -94,12 +99,12 @@ public class Robot extends TimedRobot {
   {
     if(timer.get() < 1)
     {
-      Shoot(-1.0);
+      Shoot(-0.8);
     }
     else
     {
-      if (a <= 7 && b <= 7) {
-        Drive(0.6);
+      if (a >= -11 && b >= -11) {
+        Drive(-0.8);
         Shoot(0.0);
       }
       else {
@@ -111,32 +116,45 @@ public class Robot extends TimedRobot {
 
   public void ChargeStationAuto()
   {
-    if(timer.get() > 1) {
-      if(timer.get() < 5) {
-        Drive(0.6);
+    if(timer.get() < 1)
+    {
+      Shoot(-1.0);
+    }
+    else if(timer.get() > 1) {
+      if(timer.get() < 2.5) {
+        Drive(-0.8);
         Shoot(0.0);
       } 
-      else {
-        Drive(0.0);
+      else if(navX.getRoll() < 10){
+        Drive(0.3);
         Shoot(0.0);
       }
-      if(timer.get() <= 1)
+      else if(navX.getRoll() > 10)
       {
-        Shoot(1.0);
+        Drive(-0.3);
+        Shoot(0.0);
       }
+      else
+      {
+        Drive(0.0);
+        Shoot(0.0);
+      }  
     }
   }
 
   @Override
   public void robotInit() {
     // r_intake.follow(l_intake);
-    lb_motor.follow(lf_motor);
-    rb_motor.follow(rf_motor);
+    //lb_motor.follow(lf_motor);
+    //rb_motor.follow(rf_motor);
 
     lb_motor.setInverted(false);
     lf_motor.setInverted(false);
     rf_motor.setInverted(true);
     rb_motor.setInverted(true);
+
+
+
 
     r_intake.setInverted(true);
     l_intake.setInverted(false);
@@ -193,16 +211,16 @@ public class Robot extends TimedRobot {
     double power = oper.getRawAxis(1);
     boolean but1 = oper.getRawButton(1);
     boolean but2 = oper.getRawButton(2);
-    double out = 1.0;
+    double out = 0.8;
     Shoot(power);
 
     if(but1)
     {
-      Shoot(out);
+      Shoot(-out);
     }
     else if(but2)
     {
-      Shoot(-out);
+      Shoot(0.6);
     }
     else
     {
