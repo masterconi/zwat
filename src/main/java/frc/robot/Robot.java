@@ -191,8 +191,8 @@ public class Robot extends TimedRobot {
     //Tank(ly_thr,ry_thr);
     
     double power = oper.getRawAxis(1);
-    double but1 = oper.getRawButton(1);
-    double but2 = oper.getRawButton(2);
+    boolean but1 = oper.getRawButton(1);
+    boolean but2 = oper.getRawButton(2);
     double out = 1.0;
     Shoot(power);
 
