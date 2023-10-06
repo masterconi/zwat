@@ -37,8 +37,18 @@ public class Robot extends TimedRobot {
   AHRS navX = new AHRS();
   Timer timer = new Timer();
 
-  Encoder encL = new Encoder(0, 1, false);
-  Encoder encR = new Encoder(2, 3, true);
+  Encoder encLeft = new Encoder(0, 1, false);
+  Encoder encRight = new Encoder(2, 3, true);
+
+  private final boolean fireButton = oper.getRawButton(1);
+  private final boolean inTakeButton = oper.getRawButton(2);
+  private static double driveDistance;
+  private static double l_Distance;
+  private static double r_Distance;
+  private static double Angle = 10;
+  private final double ly_thr = driver.getRawAxis(1);
+  private final double rx_turn = driver.getRawAxis(4);
+  private final double ry_thr = driver.getRawAxis(5);
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -88,11 +98,11 @@ public class Robot extends TimedRobot {
     rf_motor.set(ControlMode.PercentOutput, y2);
   }
 
-  public void WallRideAuto(double a, double b) {
+  public void WallRideAuto(double a, double b, double dist) {
     if (timer.get() < 1) {
       Shoot(-0.8);
     } else {
-      if (a >= -13 && b >= -13) {
+      if (a >= dist && b >= dist) {
         Drive(-0.8);
         Shoot(0.0);
       } else {
@@ -102,17 +112,17 @@ public class Robot extends TimedRobot {
     }
   }
 
-  public void ChargeStationAuto() {
+  public void ChargeStationAuto(double Angle) {
     if (timer.get() < 1) {
       Shoot(-1.0);
     } else if (timer.get() > 1) {
       if (timer.get() < 2) {
         Drive(-1);
         Shoot(0.0);
-      } else if (navX.getRoll() > 10) {
+      } else if (navX.getRoll() > Angle) {
         Drive(0.5);
         Shoot(0.0);
-      } else if (navX.getRoll() < -10) {
+      } else if (navX.getRoll() < -Angle) {
         Drive(-0.5);
         Shoot(0.0);
       } else {
@@ -129,41 +139,43 @@ public class Robot extends TimedRobot {
     rf_motor.setInverted(true);
     rb_motor.setInverted(true);
 
-    r_intake.setInverted(true);
-    l_intake.setInverted(false);
+    r_intake.setInverted(false);
+    l_intake.setInverted(true);
 
-    encL.reset();
-    encR.reset();
-    encL.setReverseDirection(false);
-    encR.setReverseDirection(true);
-    encL.setDistancePerPulse(1 / 1024.0);
-    encR.setDistancePerPulse(1 / 1024.0);
+    encLeft.reset();
+    encRight.reset();
+    encLeft.setReverseDirection(false);
+    encRight.setReverseDirection(true);
+    encLeft.setDistancePerPulse(6 / 256.0);
+    encRight.setDistancePerPulse(6 / 256.0);
     timer.restart();
   }
 
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("Enc left", encL.getDistance());
-    SmartDashboard.putNumber("Enc Right", encR.getDistance());
+    SmartDashboard.putNumber("Enc left", encLeft.getDistance());
+    SmartDashboard.putNumber("Enc Right", encRight.getDistance());
     SmartDashboard.putNumber("Timer", timer.get());
     SmartDashboard.putNumber("Robot Roll", navX.getRoll());
   }
 
   @Override
   public void autonomousInit() {
-    encL.reset();
-    encR.reset();
+    encLeft.reset();
+    encRight.reset();
     timer.restart();
     navX.reset();
   }
 
   @Override
   public void autonomousPeriodic() {
-    double a = encL.getDistance();
-    double b = encR.getDistance();
+    l_Distance = encLeft.getDistance();
+    r_Distance = encRight.getDistance();
+    driveDistance = -10;
+    Angle = 10;
 
-    WallRideAuto(a, b);
-    // ChargeStationAuto();
+    WallRideAuto(l_Distance, r_Distance, driveDistance);
+    // ChargeStationAuto(Angle);
   }
 
   @Override
@@ -173,23 +185,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    double ly_thr = driver.getRawAxis(1);
-    double rx_turn = driver.getRawAxis(4);
-    // double ry_thr= driver.getRawAxis(5);
-
     Arcade(ly_thr, rx_turn);
-    // Tank(ly_thr,ry_thr);
+    // Tank(ly_thr, ry_thr);
 
-    double power = oper.getRawAxis(1);
-    boolean but1 = oper.getRawButton(1);
-    boolean but2 = oper.getRawButton(2);
-    double out = 1.0;
-    Shoot(power);
-
-    if (but1) {
-      Shoot(-out);
-    } else if (but2) {
-      Shoot(0.6);
+    if (fireButton) {
+      Shoot(1.0);
+    } else if (inTakeButton) {
+      Shoot(-0.6);
     } else {
       Shoot(0.0);
     }
