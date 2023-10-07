@@ -12,17 +12,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj.Timer;
+
 import com.kauailabs.navx.frc.AHRS;
 
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the
- * name of this class or
- * the package after creating this project, you must also update the
- * build.gradle file in the
- * project.
- */
 public class Robot extends TimedRobot {
   TalonSRX lb_motor = new TalonSRX(1);
   VictorSPX lf_motor = new VictorSPX(2);
@@ -40,15 +32,15 @@ public class Robot extends TimedRobot {
   Encoder encLeft = new Encoder(0, 1, false);
   Encoder encRight = new Encoder(2, 3, true);
 
-  private final boolean fireButton = oper.getRawButton(1);
-  private final boolean inTakeButton = oper.getRawButton(2);
+  private boolean fireButton = oper.getRawButton(1);
+  private boolean inTakeButton = oper.getRawButton(2);
   private static double driveDistance;
   private static double l_Distance;
   private static double r_Distance;
   private static double Angle = 10;
-  private final double ly_thr = driver.getRawAxis(1);
-  private final double rx_turn = driver.getRawAxis(4);
-  private final double ry_thr = driver.getRawAxis(5);
+  private double ly_thr = driver.getRawAxis(1);
+  private double rx_turn = driver.getRawAxis(4);
+  private double ry_thr = driver.getRawAxis(5);
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -86,7 +78,6 @@ public class Robot extends TimedRobot {
   }
 
   public void Tank(double y1, double y2) {
-    // Made For Controllers
     if (Math.abs(y1) < 0.1) {
       y1 = 0.0;
     }
@@ -95,12 +86,14 @@ public class Robot extends TimedRobot {
     }
 
     lf_motor.set(ControlMode.PercentOutput, y1);
+    lb_motor.set(ControlMode.PercentOutput, y1); 
     rf_motor.set(ControlMode.PercentOutput, y2);
+    rb_motor.set(ControlMode.PercentOutput, y2);
   }
 
   public void WallRideAuto(double a, double b, double dist) {
     if (timer.get() < 1) {
-      Shoot(-0.8);
+      Shoot(1.0);
     } else {
       if (a >= dist && b >= dist) {
         Drive(-0.8);
@@ -182,7 +175,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     timer.restart();
   }
-
+  
   @Override
   public void teleopPeriodic() {
     Arcade(ly_thr, rx_turn);
@@ -212,7 +205,6 @@ public class Robot extends TimedRobot {
   @Override
   public void testPeriodic() {
     // read stick value and assign to value
-
     double stick = oper.getRawAxis(1);
 
     if (oper.getRawButton(7)) {
@@ -226,18 +218,6 @@ public class Robot extends TimedRobot {
     } else {
       r_intake.set(ControlMode.PercentOutput, 0.0);
     }
-
-    // if (oper.getRawButton(9)) {
-    // l_kipul.set(ControlMode.PercentOutput, stick);
-    // } else {
-    // l_kipul.set(ControlMode.PercentOutput, 0.0);
-    // }
-
-    // if (oper.getRawButton(10)) {
-    // r_kipul.set(ControlMode.PercentOutput, stick);
-    // } else {
-    // r_kipul.set(ControlMode.PercentOutput, 0.0);
-    // }
 
     if (oper.getRawButton(1)) {
       r_intake.set(ControlMode.PercentOutput, stick);
